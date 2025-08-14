@@ -5,18 +5,6 @@ return {
 		"neovim/nvim-lspconfig",
 		event = { "BufReadPre", "BufNewFile" },
 		dependencies = {
-			-- mason.nvim is a dependency of mason-lspconfig, so it must be set up first.
-			{
-				"mason-org/mason.nvim",
-				build = ":MasonUpdate",
-				config = true, -- automatically calls setup()
-			},
-			-- mason-lspconfig.nvim is a bridge between mason and nvim-lspconfig.
-			-- It must be set up after mason.nvim.
-			{
-				"mason-org/mason-lspconfig.nvim",
-				dependencies = { "mason-org/mason.nvim" },
-			},
 			"hrsh7th/cmp-nvim-lsp", -- For autocompletion
 			{ "antosha417/nvim-lsp-file-operations", config = true },
 			{ "folke/neodev.nvim", opts = {} },
@@ -24,114 +12,11 @@ return {
 		config = function()
 			-- import lspconfig plugin
 			local lspconfig = require("lspconfig")
-			local mason_lspconfig = require("mason-lspconfig")
 			local cmp_nvim_lsp = require("cmp_nvim_lsp")
 			local keymap = vim.keymap
 
 			-- The capabilities are required for all LSP servers
 			local capabilities = cmp_nvim_lsp.default_capabilities()
-
-			-- Configure Mason-Lspconfig with your custom handlers and `ensure_installed`
-			mason_lspconfig.setup({
-				-- The list of servers you want installed and configured automatically
-				ensure_installed = {
-					-- Python
-					"basedpyright", -- Language server for Python
-					"ruff", -- Fast Python linter
-
-					-- Web Development (HTML/CSS/JS)
-					"html", -- HTML language server
-					"cssls", -- CSS language server
-					"ts_ls", -- TypeScript language server (also handles JavaScript)
-					"emmet_ls", -- Snippet engine for HTML/CSS
-
-					-- Containerization
-					"dockerls", -- Dockerfile language server
-					"docker_compose_language_service", -- Docker Compose language server
-					"yamlls", -- YAML language server (for docker-compose)
-
-					-- Neovim Configuration
-					"lua_ls", -- Lua language server (essential for your config)
-
-					"jsonls", -- JSON language server (for config files, etc.)
-					"eslint_d",
-					"sqlls", -- SQL language server
-					"sqlfluff", -- SQL formatter and linter for stricter engforcement
-				},
-				handlers = {
-					-- Default handler for all servers without a specific handler
-					["_"] = function(server_name)
-						lspconfig[server_name].setup({
-							capabilities = capabilities,
-						})
-					end,
-
-					-- Specific handler for 'svelte'
-					["svelte"] = function()
-						lspconfig.svelte.setup({
-							capabilities = capabilities,
-							on_attach = function(client, bufnr)
-								vim.api.nvim_create_autocmd("BufWritePost", {
-									pattern = { "*.js", "*.ts" },
-									callback = function(ctx)
-										client.notify("$/onDidChangeTsOrJsFile", { uri = ctx.match })
-									end,
-								})
-							end,
-						})
-					end,
-
-					-- Specific handler for 'graphql'
-					["graphql"] = function()
-						lspconfig.graphql.setup({
-							capabilities = capabilities,
-							filetypes = { "graphql", "gql", "svelte", "typescriptreact", "javascriptreact" },
-						})
-					end,
-
-					-- Specific handler for 'emmet_ls'
-					["emmet_ls"] = function()
-						lspconfig.emmet_ls.setup({
-							capabilities = capabilities,
-							filetypes = {
-								"html",
-								"typescriptreact",
-								"javascriptreact",
-								"css",
-								"sass",
-								"scss",
-								"less",
-								"svelte",
-							},
-						})
-					end,
-
-					-- Specific handler for 'basedpyright'
-					["basedpyright"] = function()
-						lspconfig.basedpyright.setup({
-							capabilities = capabilities,
-							settings = {
-								basedpyright = {
-									typeCheckingMode = "standard",
-								},
-							},
-						})
-					end,
-
-					-- Specific handler for 'lua_ls'
-					["lua_ls"] = function()
-						lspconfig.lua_ls.setup({
-							capabilities = capabilities,
-							settings = {
-								Lua = {
-									diagnostics = { globals = { "vim" } },
-									completion = { callSnippet = "Replace" },
-								},
-							},
-						})
-					end,
-				},
-			})
 
 			-- The rest of your configuration (autocmds, keymaps, etc.)
 			vim.api.nvim_create_autocmd("LspAttach", {
@@ -180,11 +65,34 @@ return {
 				end,
 			})
 
-			local signs = { Error = " ", Warn = " ", Hint = "󰠠 ", Info = " " }
-			for type, icon in pairs(signs) do
-				local hl = "DiagnosticSign" .. type
-				vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = "" })
-			end
+			local icons = { Error = " ", Warn = " ", Hint = "󰠠 ", Info = " " }
+      vim.diagnostic.config({
+        virtual_text = { prefix = "●", spacing = 2 }, -- subtle dot, not noisy
+        signs = {
+          text = {
+            [vim.diagnostic.severity.ERROR] = icons.Error,
+            [vim.diagnostic.severity.WARN]  = icons.Warn,
+            [vim.diagnostic.severity.HINT]  = icons.Hint,
+            [vim.diagnostic.severity.INFO]  = icons.Info,
+          },
+          numhl = false,  -- set true if you prefer numberline highlight instead of glyphs
+        },
+        underline = true,
+        upated_in_insert = false,
+        severity_sort = true,
+        float = { border = "rounded", source = "if_many" },
+      })
+      -- rounded borders for hover + signature help
+      local h = vim.lsp.handlers
+      vim.lsp.handlers["textDocument/hover"]         = vim.lsp.with(h.hover,         { border = "rounded" })
+      vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(h.signature_help, { border = "rounded" })
+
+      -- optional: show diagnostics for the cursor line automatically
+      vim.api.nvim_create_autocmd("CursorHold", {
+        callback = function()
+          vim.diagnostic.open_float(nil, { focus = false, scope = "cursor", border = "rounded" })
+        end,
+      })
 		end,
 	},
 }
