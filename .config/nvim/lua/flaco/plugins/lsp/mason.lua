@@ -30,8 +30,7 @@ return {
 		mason_lspconfig.setup({
 			ensure_installed = {
 				-- Python
-				"basedpyright", -- Language server for Python
-				"ruff",
+				"pylsp", -- Language server for Python
 
 				-- Web Development (HTML/CSS/JS)
 				"html", -- HTML language server
@@ -89,21 +88,19 @@ return {
 				end,
 
 				-- Specific handler for 'basedpyright'
-				["basedpyright"] = function()
-					require("lspconfig").basedpyright.setup({
+				["pylsp"] = function()
+					require("lspconfig").pylsp.setup({
 						capabilities = capabilities,
 						settings = {
-							basedpyright = {
-								typeCheckingMode = "standard", -- or "basic"/"off" if you prefer
+							pylsp = {
+								plugins = {
+									pycodestyle = { enabled = false }, -- Disable style checking
+									mccabe = { enabled = false }, -- Disable complexity checking
+									pyflakes = { enabled = true }, -- Keep basic error checking
+									rope_completion = { enabled = true },
+								},
 							},
 						},
-					})
-				end,
-
-				["ruff_lsp"] = function()
-					require("lspconfig").ruff_lsp.setup({
-						capabilities = capabilities,
-						init_options = { settings = { args = {} } }, -- room for per-project .ruff.toml overrides
 					})
 				end,
 

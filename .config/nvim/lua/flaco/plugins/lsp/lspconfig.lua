@@ -66,33 +66,32 @@ return {
 			})
 
 			local icons = { Error = " ", Warn = " ", Hint = "󰠠 ", Info = " " }
-      vim.diagnostic.config({
-        virtual_text = { prefix = "●", spacing = 2 }, -- subtle dot, not noisy
-        signs = {
-          text = {
-            [vim.diagnostic.severity.ERROR] = icons.Error,
-            [vim.diagnostic.severity.WARN]  = icons.Warn,
-            [vim.diagnostic.severity.HINT]  = icons.Hint,
-            [vim.diagnostic.severity.INFO]  = icons.Info,
-          },
-          numhl = false,  -- set true if you prefer numberline highlight instead of glyphs
-        },
-        underline = true,
-        upated_in_insert = false,
-        severity_sort = true,
-        float = { border = "rounded", source = "if_many" },
-      })
-      -- rounded borders for hover + signature help
-      local h = vim.lsp.handlers
-      vim.lsp.handlers["textDocument/hover"]         = vim.lsp.with(h.hover,         { border = "rounded" })
-      vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(h.signature_help, { border = "rounded" })
+			vim.diagnostic.config({
+				signs = {
+					text = {
+						[vim.diagnostic.severity.ERROR] = icons.Error,
+						[vim.diagnostic.severity.WARN] = icons.Warn,
+						[vim.diagnostic.severity.HINT] = icons.Hint,
+						[vim.diagnostic.severity.INFO] = icons.Info,
+					},
+					numhl = false, -- set true if you prefer numberline highlight instead of glyphs
+				},
+				underline = true,
+				upated_in_insert = false,
+				severity_sort = true,
+				float = { border = "rounded", source = "if_many" },
+			})
+			-- rounded borders for hover + signature help
+			local h = vim.lsp.handlers
+			vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(h.hover, { border = "rounded" })
+			vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(h.signature_help, { border = "rounded" })
 
-      -- optional: show diagnostics for the cursor line automatically
-      vim.api.nvim_create_autocmd("CursorHold", {
-        callback = function()
-          vim.diagnostic.open_float(nil, { focus = false, scope = "cursor", border = "rounded" })
-        end,
-      })
+			-- optional: show diagnostics for the cursor line automatically
+			vim.api.nvim_create_autocmd("CursorHold", {
+				callback = function()
+					vim.diagnostic.open_float(nil, { focus = false, scope = "cursor", border = "rounded" })
+				end,
+			})
 		end,
 	},
 }
