@@ -1,39 +1,41 @@
-# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
-# Initialization code that may require console input (password prompts, [y/n]
-# confirmations, etc.) must go above this block; everything else may go below.
+# --- Powerlevel10k instant prompt: keep at the very top ---
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
+eval "$(/opt/homebrew/bin/brew shellenv)"
+
+# Optional while diagnosing (remove later if you like)
+typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
+# ----------------------------------------------------------
+
+# Powerlevel10k
 source /opt/homebrew/share/powerlevel10k/powerlevel10k.zsh-theme
+[[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
 
-# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
-[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-
-# history setup
+# History
 HISTFILE=$HOME/.zhistory
 SAVEHIST=1000
 HISTSIZE=999
-setopt share_history
-setopt hist_expire_dups_first
-setopt hist_ignore_dups
-setopt hist_verify
+setopt share_history hist_expire_dups_first hist_ignore_dups hist_verify
 
-# completion using arrow keys (based on history)
+# Keybindings (history search with ↑/↓)
 bindkey '^[[A' history-search-backward
 bindkey '^[[B' history-search-forward
+
+# ---- Completions (set fpath BEFORE compinit) ----
+fpath=("$HOME/.docker/completions" $fpath)
+autoload -Uz compinit
+compinit -C         # (after fixing perms above; use -u only if you must)
+
+# ---- Plugins/tools (after compinit) ----
 source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-
-# ---- Eza (better ls) -----
-alias ls="eza --icons=always"
-
-# ---- Zoxide (better cd) ----
 eval "$(zoxide init zsh)"
 
-alias cd="z"
-# The following lines have been added by Docker Desktop to enable Docker CLI completions.
-fpath=(/Users/flaco/.docker/completions $fpath)
-autoload -Uz compinit
-compinit
-# End of Docker CLI completions
+# Aliases
+alias ls="eza --icons=always"
+alias cd="z"        # Note: this overrides `cd -` behavior; remove if you rely on it
+
+# Keep syntax highlighting LAST
+source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+eval "$(/opt/homebrew/bin/brew shellenv)"
