@@ -5,6 +5,10 @@ fi
 
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
+# Python paths
+export PATH="/Library/Frameworks/Python.framework/Versions/3.12/bin:$PATH"
+export PATH="$HOME/Library/Python/3.9/bin:$PATH"
+
 # Optional while diagnosing (remove later if you like)
 typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
 # ----------------------------------------------------------
