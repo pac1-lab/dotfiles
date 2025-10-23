@@ -33,7 +33,6 @@ opt.backspace = "indent,eol,start" -- allow backspace on indent, end of line or 
 opt.clipboard:append("unnamedplus") -- use system clipboard as default register
 
 -- Highlight when yanking (copying) text
---  Try it with `yap` in normal mode
 api.nvim_create_autocmd("TextYankPost", {
 	desc = "Highlight when yanking (copying) text",
 	group = api.nvim_create_augroup("kickstart-highlight-yank", { clear = true }),
