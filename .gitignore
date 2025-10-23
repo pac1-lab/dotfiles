@@ -1,3 +1,5 @@
 .tmux/plugins/*
 !.tmux/plugins/.gitkeep
 .tmux/plugins/
+**/.DS_Store
+.DS_Store
