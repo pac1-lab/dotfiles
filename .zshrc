@@ -37,7 +37,10 @@ source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 eval "$(zoxide init zsh)"
 
 # Aliases
-alias ls="eza --icons=always"
+alias ls="eza --group-directories-first --icons=auto --git --long --no-user -h"
+alias lsa="ls -a"
+alias lt="eza --tree --level=2 --long --icons --git"
+alias lta="lt -a"
 alias cd="z"        # Note: this overrides `cd -` behavior; remove if you rely on it
 
 # Keep syntax highlighting LAST
