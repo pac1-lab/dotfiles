@@ -41,5 +41,8 @@ return {
 		keymap.set("n", "<leader>fn", function()
 			builtin.find_files({ cwd = vim.fn.stdpath("config") })
 		end, { desc = "Find Neovim files" })
+		keymap.set("n", "<leader>fN", function()
+			builtin.live_grep({ cwd = vim.fn.stdpath("config") })
+		end, { desc = "Find string in Neovim files" })
 	end,
 }
