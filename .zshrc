@@ -43,6 +43,14 @@ alias lt="eza --tree --level=2 --long --icons --git"
 alias lta="lt -a"
 alias cd="z"        # Note: this overrides `cd -` behavior; remove if you rely on it
 
+function y() {
+	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
+	command yazi "$@" --cwd-file="$tmp"
+	IFS= read -r -d '' cwd < "$tmp"
+	[ "$cwd" != "$PWD" ] && [ -d "$cwd" ] && builtin cd -- "$cwd"
+	rm -f -- "$tmp"
+}
+
 # Keep syntax highlighting LAST
 source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 eval "$(/opt/homebrew/bin/brew shellenv)"
