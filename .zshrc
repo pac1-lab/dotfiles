@@ -42,6 +42,7 @@ alias lsa="ls -a"
 alias lt="eza --tree --level=2 --long --icons --git"
 alias lta="lt -a"
 alias cd="z"        # Note: this overrides `cd -` behavior; remove if you rely on it
+alias lzd="lazydocker"
 
 function y() {
 	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
