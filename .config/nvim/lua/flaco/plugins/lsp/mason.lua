@@ -7,7 +7,7 @@ return {
 		"b0o/schemastore.nvim",
 	},
 	config = function()
-		local lspconfig = require("lspconfig")
+		local util = require("lspconfig.util")
 		local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
 		-- import mason
@@ -15,6 +15,19 @@ return {
 		-- import mason-lspconfig
 		local mason_lspconfig = require("mason-lspconfig")
 		local mason_tool_installer = require("mason-tool-installer")
+		local enabled_servers = {
+			"pylsp",
+			"html",
+			"cssls",
+			"ts_ls",
+			"emmet_ls",
+			"dockerls",
+			"docker_compose_language_service",
+			"yamlls",
+			"jsonls",
+			"lua_ls",
+			"sqlls",
+		}
 
 		-- enable mason and configure icons
 		mason.setup({
@@ -50,109 +63,106 @@ return {
 				-- SQL
 				"sqlls", -- SQL language server
 			},
-			handlers = {
-				-- Default handler for all servers without a specific handler
-				function(server)
-					lspconfig[server].setup({
-						capabilities = capabilities,
-					})
-				end,
+			automatic_enable = false,
+		})
 
-				["ts_ls"] = function()
-					require("lspconfig").ts_ls.setup({
-						capabilities = capabilities,
-						on_attach = function(client)
-							client.server_capabilities.documentFormattingProvider = false
-						end,
-						settings = {
-							typescript = { inlayHints = { includeInlayParameterNameHints = "all" } },
-							javascript = { inlayHints = { includeInlayParameterNameHints = "all" } },
-						},
-					})
-				end,
-
-				-- Specific handler for 'emmet_ls'
-				["emmet_ls"] = function()
-					lspconfig.emmet_ls.setup({
-						capabilities = capabilities,
-						filetypes = {
-							"html",
-							"typescriptreact",
-							"javascriptreact",
-							"css",
-							"sass",
-							"scss",
-							"less",
-						},
-					})
-				end,
-
-				-- Specific handler for 'basedpyright'
-				["pylsp"] = function()
-					require("lspconfig").pylsp.setup({
-						capabilities = capabilities,
-						settings = {
-							pylsp = {
-								plugins = {
-									pycodestyle = { enabled = false }, -- Disable style checking
-									mccabe = { enabled = false }, -- Disable complexity checking
-									pyflakes = { enabled = true }, -- Keep basic error checking
-									rope_completion = { enabled = true },
-								},
-							},
-						},
-					})
-				end,
-
-				["jsonls"] = function()
-					require("lspconfig").jsonls.setup({
-						capabilities = capabilities,
-						settings = {
-							json = {
-								schemas = require("schemastore").json.schemas(),
-								validate = { enable = true },
-							},
-						},
-					})
-				end,
-
-				["yamlls"] = function()
-					require("lspconfig").yamlls.setup({
-						capabilities = capabilities,
-						settings = {
-							yaml = {
-								schemaStore = { enable = false, url = "" }, -- we use schemastore.nvim instead
-								schemas = require("schemastore").yaml.schemas(),
-								keyOrdering = false,
-							},
-						},
-					})
-				end,
-
-				-- Specific handler for 'lua_ls'
-				["lua_ls"] = function()
-					lspconfig.lua_ls.setup({
-						capabilities = capabilities,
-						settings = {
-							Lua = {
-								diagnostics = { globals = { "vim" } },
-								workspace = { checkThirdParty = false },
-								completion = { callSnippet = "Replace" },
-							},
-						},
-					})
-				end,
-
-				["sqlls"] = function()
-					local lspconfig = require("lspconfig")
-					local util = require("lspconfig.util")
-					lspconfig.sqlls.setup({
-						capabilities = capabilities,
-						root_dir = util.root_pattern(".sqllsrc.json", ".git") or util.path.dirname, -- fallback to cwd
-					})
-				end,
+		vim.lsp.config("pylsp", {
+			capabilities = capabilities,
+			settings = {
+				pylsp = {
+					plugins = {
+						pycodestyle = { enabled = false },
+						mccabe = { enabled = false },
+						pyflakes = { enabled = true },
+						rope_completion = { enabled = true },
+					},
+				},
 			},
 		})
+
+		vim.lsp.config("html", {
+			capabilities = capabilities,
+		})
+
+		vim.lsp.config("cssls", {
+			capabilities = capabilities,
+		})
+
+		vim.lsp.config("ts_ls", {
+			capabilities = capabilities,
+			on_attach = function(client)
+				client.server_capabilities.documentFormattingProvider = false
+			end,
+			settings = {
+				typescript = { inlayHints = { includeInlayParameterNameHints = "all" } },
+				javascript = { inlayHints = { includeInlayParameterNameHints = "all" } },
+			},
+		})
+
+		vim.lsp.config("emmet_ls", {
+			capabilities = capabilities,
+			filetypes = {
+				"html",
+				"typescriptreact",
+				"javascriptreact",
+				"css",
+				"sass",
+				"scss",
+				"less",
+			},
+		})
+
+		vim.lsp.config("dockerls", {
+			capabilities = capabilities,
+		})
+
+		vim.lsp.config("docker_compose_language_service", {
+			capabilities = capabilities,
+		})
+
+		vim.lsp.config("jsonls", {
+			capabilities = capabilities,
+			settings = {
+				json = {
+					schemas = require("schemastore").json.schemas(),
+					validate = { enable = true },
+				},
+			},
+		})
+
+		vim.lsp.config("yamlls", {
+			capabilities = capabilities,
+			settings = {
+				yaml = {
+					schemaStore = { enable = false, url = "" },
+					schemas = require("schemastore").yaml.schemas(),
+					keyOrdering = false,
+				},
+			},
+		})
+
+		vim.lsp.config("lua_ls", {
+			capabilities = capabilities,
+			settings = {
+				Lua = {
+					diagnostics = { globals = { "vim" } },
+					workspace = { checkThirdParty = false },
+					completion = { callSnippet = "Replace" },
+				},
+			},
+		})
+
+		vim.lsp.config("sqlls", {
+			capabilities = capabilities,
+			root_dir = function(bufnr, on_dir)
+				local fname = vim.api.nvim_buf_get_name(bufnr)
+				on_dir(util.root_pattern(".sqllsrc.json", ".git")(fname) or vim.fs.dirname(fname))
+			end,
+		})
+
+		for _, server in ipairs(enabled_servers) do
+			vim.lsp.enable(server)
+		end
 
 		mason_tool_installer.setup({
 			ensure_installed = {

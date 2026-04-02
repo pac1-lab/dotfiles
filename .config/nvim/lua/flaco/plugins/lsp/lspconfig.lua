@@ -7,16 +7,10 @@ return {
 		dependencies = {
 			"hrsh7th/cmp-nvim-lsp", -- For autocompletion
 			{ "antosha417/nvim-lsp-file-operations", config = true },
-			{ "folke/neodev.nvim", opts = {} },
+			{ "folke/lazydev.nvim", ft = "lua", opts = {} },
 		},
 		config = function()
-			-- import lspconfig plugin
-			local lspconfig = require("lspconfig")
-			local cmp_nvim_lsp = require("cmp_nvim_lsp")
 			local keymap = vim.keymap
-
-			-- The capabilities are required for all LSP servers
-			local capabilities = cmp_nvim_lsp.default_capabilities()
 
 			-- The rest of your configuration (autocmds, keymaps, etc.)
 			vim.api.nvim_create_autocmd("LspAttach", {
@@ -61,7 +55,7 @@ return {
 					keymap.set("n", "K", vim.lsp.buf.hover, opts)
 
 					opts.desc = "Restart LSP"
-					keymap.set("n", "<leader>rs", ":LspRestart<CR>", opts)
+					keymap.set("n", "<leader>rs", "<cmd>lsp restart<CR>", opts)
 				end,
 			})
 
