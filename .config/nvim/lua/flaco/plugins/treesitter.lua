@@ -35,7 +35,9 @@ return {
 			"zsh",
 		}
 
-		treesitter.setup({})
+		treesitter.setup({
+			install_dir = vim.fn.stdpath("data") .. "/site",
+		})
 
 		require("nvim-ts-autotag").setup({})
 

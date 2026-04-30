@@ -26,18 +26,12 @@ return {
 			},
 		})
 
-		vim.lsp.config("pylsp", {
+		vim.lsp.config("pyright", {
 			capabilities = capabilities,
-			settings = {
-				pylsp = {
-					plugins = {
-						pycodestyle = { enabled = false },
-						mccabe = { enabled = false },
-						pyflakes = { enabled = true },
-						rope_completion = { enabled = true },
-					},
-				},
-			},
+		})
+
+		vim.lsp.config("ruff", {
+			capabilities = capabilities,
 		})
 
 		vim.lsp.config("html", {
@@ -127,7 +121,8 @@ return {
 		mason_lspconfig.setup({
 			ensure_installed = {
 				-- Python
-				"pylsp", -- Language server for Python
+				"pyright", -- Type-aware Python language server
+				"ruff", -- Fast Python linting and code actions
 
 				-- Web Development (HTML/CSS/JS)
 				"html", -- HTML language server
@@ -148,7 +143,9 @@ return {
 				-- SQL
 				"sqlls", -- SQL language server
 			},
-			automatic_enable = true,
+			automatic_enable = {
+				exclude = { "pylsp" },
+			},
 		})
 
 		mason_tool_installer.setup({
