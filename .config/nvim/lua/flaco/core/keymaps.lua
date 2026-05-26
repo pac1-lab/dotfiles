@@ -5,8 +5,8 @@ local keymap = vim.keymap -- for conciseness
 ---------------------
 -- General Keymaps -------------------
 
--- use jk to exit insert mode
-keymap.set("i", "jk", "<ESC>", { desc = "Exit insert mode with jk" })
+-- restart
+vim.keymap.set("n", "<leader>re", "<cmd>restart<cr>", { desc = "Restart Neovim (:restart)" })
 
 -- clear search highlights (two options)
 keymap.set("n", "<leader>nh", ":nohl<CR>", { desc = "Clear search highlights" })
